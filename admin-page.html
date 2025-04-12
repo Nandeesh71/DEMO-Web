@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EmbedXplore Admin Dashboard</title>
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .header {
+      background-color: #673ab7;
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn {
+      background-color: #673ab7;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .btn:hover {
+      background-color: #5e35b1;
+    }
+    .btn-secondary {
+      background-color: white;
+      color: #673ab7;
+      border: 1px solid #673ab7;
+    }
+    .btn-secondary:hover {
+      background-color: #eee;
+    }
+    .btn-remove {
+      background-color: #ffffff;
+      color: #673ab7;
+      border: 1px solid #673ab7;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn-remove:hover {
+      background-color: rgba(103, 58, 183, 0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    .login-container {
+      max-width: 400px;
+      margin: 80px auto;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 30px;
+      display: none;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <div id="loginContainer" class="login-container">
+    <h2 style="text-align:center; color:#673ab7">Admin Login</h2>
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username">
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password">
+    </div>
+    <button id="loginBtn" class="btn">Login</button>
+  </div>
+
+  <div id="dashboardContainer" style="display: none;">
+    <div class="header">
+      <h1>EmbedXplore Admin Dashboard</h1>
+      <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+    </div>
+
+    <div style="padding: 20px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Year</th>
+            <th>Section</th>
+            <th>ID</th>
+            <th>Phone</th>
+            <th>IEEE</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody">
+          <!-- Rows will be injected here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const loginContainer = document.getElementById('loginContainer');
+    const dashboard = document.getElementById('dashboardContainer');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    const ADMIN_CREDENTIALS = {
+      admin: 'admin123',
+      emcsociety: 'emc2025'
+    };
+
+    window.onload = function () {
+      const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+      if (isLoggedIn) {
+        dashboard.style.display = 'block';
+        renderUsers();
+      } else {
+        loginContainer.style.display = 'block';
+      }
+    };
+
+    loginBtn?.addEventListener('click', () => {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      if (ADMIN_CREDENTIALS[username] === password) {
+        localStorage.setItem('adminLoggedIn', 'true');
+        loginContainer.style.display = 'none';
+        dashboard.style.display = 'block';
+        renderUsers();
+      } else {
+        alert('Invalid credentials');
+      }
+    });
+
+    logoutBtn?.addEventListener('click', () => {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('adminLoggedIn');
+        window.location.reload();
+      }
+    });
+
+    const users = JSON.parse(localStorage.getItem('registrations') || '[]');
+    const userTableBody = document.getElementById('userTableBody');
+
+    function renderUsers() {
+      userTableBody.innerHTML = '';
+      users.forEach((user, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${user.name || '-'}</td>
+          <td>${user.email || '-'}</td>
+          <td>${user.department || '-'}</td>
+          <td>${user.yearOfStudy || '-'}</td>
+          <td>${user.section || '-'}</td>
+          <td>${user.secId || '-'}</td>
+          <td>${user.phone || '-'}</td>
+          <td>${user.ieeeMembership || '-'}</td>
+          <td><button class="btn-remove" onclick="removeUser(${index})">Remove</button></td>
+        `;
+        userTableBody.appendChild(row);
+      });
+    }
+
+    function removeUser(index) {
+      if (confirm('Remove this user?')) {
+        users.splice(index, 1);
+        localStorage.setItem('registrations', JSON.stringify(users));
+        renderUsers();
+      }
+    }
+  </script>
+</body>
+</html>
